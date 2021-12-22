@@ -1,25 +1,23 @@
 plugins {
-    id 'com.android.application'
+    id 'com.android.library'
     id 'kotlin-android'
     id 'kotlin-android-extensions'
     id 'kotlin-kapt'
 }
 
 android {
+    resourcePrefix 'wc_'
     compileSdkVersion compileVersionSdk
 
     defaultConfig {
-        applicationId "weekend.coder.draggablestoryview.sample"
         minSdkVersion projectMinSdkVersion
         targetSdkVersion targetSdkVersion
         versionCode projectVersionCode
         versionName projectVersionName
 
-        multiDexEnabled true
-    }
-
-    buildFeatures {
-        dataBinding = true
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
+        vectorDrawables.useSupportLibrary = true
     }
 
     buildTypes {
@@ -29,18 +27,14 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+    buildFeatures {
+        dataBinding = true
     }
 }
 
 dependencies {
     implementation kotlinSdk
-    implementation project(':library')
-    droid.values().forEach { implementation it }
-    externalLibs.values().forEach { implementation it }
-    kaptLibs.values().forEach { kapt it }
+    internalLibs.values().forEach { implementation it }
     testLibs.values().forEach { testImplementation it }
     uiTestLibs.values().forEach { androidTestImplementation it }
 }

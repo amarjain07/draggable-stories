@@ -1,4 +1,4 @@
-package weekend.coder.sample
+package weekend.coder.library
 
 import org.junit.Test
 
