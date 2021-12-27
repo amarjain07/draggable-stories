@@ -1,8 +1,7 @@
 # Draggable StoriesView
 Stories View like Whatsapp, Instagram, Facebook, Twitter.
 
-[![Release](https://jitpack.io/v/amarjain07/DraggableStoryView.svg)]
-(https://jitpack.io/#amarjain07/DraggableStoryView)
+[![](https://jitpack.io/v/amarjain07/draggable-stories.svg)](https://jitpack.io/#amarjain07/draggable-stories)
 
 ## Install
 
