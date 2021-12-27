@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <declare-styleable name="StoriesView" tools:ignore="ResourceName">
+        <attr name="storyDurationInSec" format="integer" />
+    </declare-styleable>
+    <declare-styleable name="DraggableView" tools:ignore="ResourceName">
+        <attr name="draggableView" format="reference" />
+        <attr name="draggableContainer" format="reference" />
+    </declare-styleable>
+</resources>
