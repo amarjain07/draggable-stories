@@ -6,7 +6,7 @@ ext {
     projectVersionCode = 1
     projectVersionName = "0.0.1"
 
-    kotlinVersion = '1.3.61'
+    kotlinVersion = '1.6.10'
     kotlinSdk = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
 
     androidXCoreVersion = '1.3.2'
