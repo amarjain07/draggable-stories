@@ -37,6 +37,7 @@ class MainActivity : AppCompatActivity(), StoryCallback {
         currentClickState = ClickState.STATIC
         toggleStaticStories(hide = false)
         staticStoriesContainer
+            .setStoryDurationsInSeconds(listOf(2, 1, 1))
             .setCallback(this@MainActivity)
             .start()
     }
@@ -49,20 +50,10 @@ class MainActivity : AppCompatActivity(), StoryCallback {
             R.layout.layout_story, null, false
         )
         dynamicStoriesView?.addView(storyOne, INDEX_REMOTE_IMAGE_STORY)
-        val storyTwo = TextView(this)
-        storyTwo.layoutParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
-        storyTwo.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light))
-        storyTwo.gravity = Gravity.CENTER
-        storyTwo.textSize = 24f
-        storyTwo.typeface = Typeface.DEFAULT_BOLD
-        storyTwo.text = getString(R.string.title_2)
-        dynamicStoriesView?.addView(storyTwo)
+        dynamicStoriesView?.addView(storyTwoTextView())
         dynamicStoriesView?.let { storiesView ->
             storiesView
-                .setStoryDurationsInSeconds(listOf(2, 4))
+                .setStoryDurationsInSeconds(listOf(2, 1))
                 .setCallback(this@MainActivity)
                 .start()
         }
@@ -96,7 +87,7 @@ class MainActivity : AppCompatActivity(), StoryCallback {
         btnDynamicLaunch.visibility = visibility
     }
 
-    private fun loadImage(imageView: ImageView, onImageLoad: () -> Unit) {
+    private fun storyOneImage(imageView: ImageView, onImageLoad: () -> Unit) {
         val circularProgressDrawable = CircularProgressDrawable(this)
         circularProgressDrawable.strokeWidth = 5f
         circularProgressDrawable.centerRadius = 60f
@@ -131,16 +122,33 @@ class MainActivity : AppCompatActivity(), StoryCallback {
             .into(imageView)
     }
 
+    private fun storyTwoTextView(): TextView {
+        val storyTwo = TextView(this)
+        storyTwo.layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
+        storyTwo.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light))
+        storyTwo.gravity = Gravity.CENTER
+        storyTwo.textSize = 24f
+        storyTwo.typeface = Typeface.DEFAULT_BOLD
+        storyTwo.text = getString(R.string.title_2)
+        return storyTwo
+    }
+
     override fun onStoryEnd() {
         Log.d(TAG, "Story Ended")
+        if(currentClickState == ClickState.DYNAMIC){
+            toggleDynamicStories(hide = true)
+        }
     }
 
     override fun onStoryChange(view: View, index: Int, direction: StoryChangeDirection) {
         Log.d(TAG, "Story Changed to $index")
         if (currentClickState == ClickState.DYNAMIC && index == INDEX_REMOTE_IMAGE_STORY) {
             dynamicStoriesView?.pause()
-            loadImage(view.findViewById(R.id.iv_image)) {
-                dynamicStoriesView?.resumeWithNewDuration(5)
+            storyOneImage(view.findViewById(R.id.iv_image)) {
+                dynamicStoriesView?.resumeWithNewDuration(3)
             }
         }
     }
@@ -151,8 +159,11 @@ class MainActivity : AppCompatActivity(), StoryCallback {
 
     override fun onDragDismiss() {
         Log.d(TAG, "Story View dismissed")
-        toggleStaticStories(hide = true)
-        toggleDynamicStories(hide = true)
+        if (currentClickState == ClickState.STATIC) {
+            toggleStaticStories(hide = true)
+        } else if (currentClickState == ClickState.DYNAMIC) {
+            toggleDynamicStories(hide = true)
+        }
     }
 
     companion object {

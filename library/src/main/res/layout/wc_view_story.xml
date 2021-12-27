@@ -16,7 +16,7 @@
         android:layout_height="match_parent">
 
         <FrameLayout
-            android:id="@+id/ll_current_view"
+            android:id="@+id/currentView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
@@ -27,7 +27,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
-            android:id="@+id/ll_progress_overlay"
+            android:id="@+id/progressOverlay"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"

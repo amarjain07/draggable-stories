@@ -7,13 +7,15 @@ import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import android.widget.LinearLayout
 import androidx.constraintlayout.widget.ConstraintLayout
-import kotlinx.android.synthetic.main.wc_view_story.view.*
+import kotlinx.android.synthetic.main.wc_view_story.view.currentView
+import kotlinx.android.synthetic.main.wc_view_story.view.dragParent
+import kotlinx.android.synthetic.main.wc_view_story.view.progressOverlay
 import weekend.coder.library.drag.DragListener
 import weekend.coder.library.gesture.StoryChangeDirection
 import weekend.coder.library.gesture.StoryTouchListener
 import weekend.coder.library.progress.StoryHorizontalProgress
-import weekend.coder.library.progress.StoryProgressWatcher
 import weekend.coder.library.progress.StoryProgressWatcherImpl
+import weekend.coder.library.utils.DEFAULT_STORY_INDEX
 import weekend.coder.library.utils.crossFade
 import kotlin.math.max
 import kotlin.math.min
@@ -22,7 +24,7 @@ class StoriesView @JvmOverloads constructor(
     context: Context,
     attributeSet: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : ConstraintLayout(context, attributeSet, defStyleAttr), StoryAction, DragListener {
+) : ConstraintLayout(context, attributeSet, defStyleAttr), StoryAction, StoryBuilder, DragListener {
 
     private var parentView: View? = null
     private var crossFadeAnimator: ViewPropertyAnimator? = null
@@ -48,7 +50,7 @@ class StoriesView @JvmOverloads constructor(
     init {
         initializeAttributes(attributeSet)
         parentView = View.inflate(context, R.layout.wc_view_story, this)
-        parentView?.ll_current_view?.setOnTouchListener(touchListener)
+        parentView?.currentView?.setOnTouchListener(touchListener)
         parentView?.dragParent?.setDragListener(this)
         val params = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -61,14 +63,14 @@ class StoriesView @JvmOverloads constructor(
         parentView?.let { mainView ->
             if (child != null) {
                 if (child.id == NO_ID) child.id = View.generateViewId()
-                val lastIndex = mainView.ll_current_view.indexOfChild(child)
+                val lastIndex = mainView.currentView.indexOfChild(child)
                 if (lastIndex < 0) {
                     val storyIndex = storyList.size
                     storyList.add(storyIndex, child)
                     val progressView = progressView()
                     progressViews.add(progressView)
-                    mainView.ll_progress_overlay.addView(progressView)
-                    mainView.ll_current_view.addView(child)
+                    mainView.progressOverlay.addView(progressView)
+                    mainView.currentView.addView(child)
                     if (storyIndex == 0) {
                         child.visibility = View.VISIBLE
                     } else {
@@ -89,34 +91,36 @@ class StoriesView @JvmOverloads constructor(
         storyCallback?.onDragDismiss()
     }
 
-    fun setStoryDurationsInSeconds(durations: List<Int>): StoriesView {
+    override fun setStoryDurationsInSeconds(durations: List<Int>): StoriesView {
         durationPerStory = durations
         return this
     }
 
-    fun crossFadeDurationInMillis(crossFadeDuration: Long): StoriesView {
+    override fun crossFadeDurationInMillis(crossFadeDuration: Long): StoriesView {
         this.crossFadeDuration = crossFadeDuration
         return this
     }
 
-    fun setCallback(callback: StoryCallback): StoriesView {
+    override fun setCallback(callback: StoryCallback): StoriesView {
         storyCallback = callback
         return this
     }
 
-    override fun start() {
-        reset()
+    override fun start(from: Int) {
+        resetDrag()
+        previousIndex = currentIndex
+        currentIndex = from
         showCurrent(StoryChangeDirection.INIT)
     }
 
     override fun reset() {
-        parentView?.let { mainView ->
-            val prevView = mainView.ll_current_view.getChildAt(currentIndex)
-            prevView.visibility = View.GONE
-            mainView.dragParent.changeDragViewAlpha(0f)
-        }
-        currentIndex = 0
-        previousIndex = 0
+        resetDrag()
+        previousIndex = currentIndex
+        currentIndex = DEFAULT_STORY_INDEX
+    }
+
+    private fun resetDrag() {
+        parentView?.dragParent?.changeDragViewAlpha(0f)
     }
 
     override fun pause() {
@@ -161,7 +165,7 @@ class StoriesView @JvmOverloads constructor(
     }
 
     private fun showCurrent(direction: StoryChangeDirection) {
-        val totalStories = min(storyList.size, parentView?.ll_current_view?.childCount ?: 0)
+        val totalStories = getTotalStoriesCount()
         if (totalStories == 0) return
         if (currentIndex != 0) {
             for (i in 0..max(0, currentIndex - 1)) {
@@ -181,8 +185,8 @@ class StoriesView @JvmOverloads constructor(
             progressViews[currentIndex].startProgress(getStoryDuration(currentIndex))
             storyCallback?.onStoryChange(currentView, currentIndex, direction)
             parentView?.let { mainView ->
-                val prevView = mainView.ll_current_view.getChildAt(previousIndex)
-                val curView = mainView.ll_current_view.getChildAt(currentIndex)
+                val prevView = mainView.currentView.getChildAt(previousIndex)
+                val curView = mainView.currentView.getChildAt(currentIndex)
                 if (previousIndex != currentIndex) {
                     val fadeDuration = if (crossFadeDuration < 0) 0L else crossFadeDuration
                     crossFadeAnimator?.cancel()
@@ -196,6 +200,9 @@ class StoriesView @JvmOverloads constructor(
             }
         }
     }
+
+    private fun getTotalStoriesCount(): Int =
+        min(storyList.size, parentView?.currentView?.childCount ?: 0)
 
     private fun progressView(): StoryHorizontalProgress {
         return StoryHorizontalProgress(context).apply { progressWatcher(progressWatcher) }
