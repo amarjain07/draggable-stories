@@ -1,6 +1,29 @@
 # Draggable StoriesView
 Stories View like Whatsapp, Instagram, Facebook, Twitter.
 
+[![Release](https://jitpack.io/v/amarjain07/DraggableStoryView.svg)]
+(https://jitpack.io/#amarjain07/DraggableStoryView)
+
+## Install
+
+Add jitpack to your root's `build.gradle`
+```groovy
+allprojects {
+	repositories {
+		maven { url "https://jitpack.io" }
+	}
+}
+```
+Add dependency to the library in a module
+```groovy
+dependencies {
+    implementation 'weekend.coder:stories:<latest-version>'
+}
+```
+
+## Demo
+![Static Stories](demo/stories_static.gif) ![Dynamic Stories](demo/stories_dynamic.gif)
+
 ## Features
 - Automatic switch between the stories with a configuration duration for each story.
 - Drag/Pull to close the stories view.
@@ -8,9 +31,6 @@ Stories View like Whatsapp, Instagram, Facebook, Twitter.
 - Pause/Resume stories on tap.
 - Support for loading remote images/videos in the story.
 - Option to start stories from any index.
-
-### Demo
-![Static Stories](demo/stories_static.gif) ![Dynamic Stories](demo/stories_dynamic.gif)
 
 ### Using xml
 All the direct children of *weekend.coder.library.StoriesView* become the individual stories.
