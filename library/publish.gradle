@@ -7,13 +7,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'weekend.coder'
                 artifactId = 'stories'
-                version = '1.0.0'
-            }
-            debug(MavenPublication) {
-                from components.debug
-                groupId = 'weekend.coder'
-                artifactId = 'stories-debug'
-                version = '1.0.0'
+                version = '1.0.3'
             }
         }
     }
