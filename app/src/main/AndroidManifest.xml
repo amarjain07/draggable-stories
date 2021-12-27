@@ -16,10 +16,10 @@
         android:theme="@style/Theme.DraggableStoryView">
         <activity
             android:name=".MainActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Transparent.FullScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
