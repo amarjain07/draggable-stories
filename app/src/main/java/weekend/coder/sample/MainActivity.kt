@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity(), StoryCallback {
         currentClickState = ClickState.STATIC
         toggleStaticStories(hide = false)
         staticStoriesContainer
-            .setStoryDurationsInSeconds(listOf(2, 1, 1))
             .setCallback(this@MainActivity)
             .start()
     }
