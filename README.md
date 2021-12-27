@@ -16,7 +16,7 @@ allprojects {
 Add dependency to the library in a module
 ```groovy
 dependencies {
-    implementation 'weekend.coder:stories:<latest-version>'
+	implementation 'com.github.amarjain07:draggable-stories:<latest-version>'
 }
 ```
 
