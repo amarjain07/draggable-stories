@@ -109,7 +109,11 @@ class StoriesView @JvmOverloads constructor(
     override fun start(from: Int) {
         resetDrag()
         previousIndex = currentIndex
-        currentIndex = from
+        currentIndex = if(from >= 0 && from < storyList.size){
+            from
+        } else {
+            DEFAULT_STORY_INDEX
+        }
         showCurrent(StoryChangeDirection.INIT)
     }
 
@@ -165,7 +169,7 @@ class StoriesView @JvmOverloads constructor(
     }
 
     private fun showCurrent(direction: StoryChangeDirection) {
-        val totalStories = getTotalStoriesCount()
+        val totalStories = storyList.size
         if (totalStories == 0) return
         if (currentIndex != 0) {
             for (i in 0..max(0, currentIndex - 1)) {
@@ -200,9 +204,6 @@ class StoriesView @JvmOverloads constructor(
             }
         }
     }
-
-    private fun getTotalStoriesCount(): Int =
-        min(storyList.size, parentView?.currentView?.childCount ?: 0)
 
     private fun progressView(): StoryHorizontalProgress {
         return StoryHorizontalProgress(context).apply { progressWatcher(progressWatcher) }
