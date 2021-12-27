@@ -9,6 +9,9 @@ Stories View like Whatsapp, Instagram, Facebook, Twitter.
 - Support for loading remote images/videos in the story.
 - Option to start stories from any index.
 
+### Demo
+![Static Stories](demo/stories_static.gif) ![Dynamic Stories](demo/stories_dynamic.gif)
+
 ### Using xml
 All the direct children of *weekend.coder.library.StoriesView* become the individual stories.
 ```xml

@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity(), StoryCallback {
         circularProgressDrawable.centerRadius = 60f
         circularProgressDrawable.start()
         Glide.with(this)
-            .load("https://tinyurl.com/amarjain")
+            .load("https://i.ibb.co/9YPVgSm/PXL-20211206-123941364-PORTRAIT-2.jpg")
             .placeholder(circularProgressDrawable)
             .addListener(object : RequestListener<Drawable> {
                 override fun onResourceReady(
