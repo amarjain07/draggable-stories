@@ -24,7 +24,7 @@ dependencies {
 ![Static Stories](demo/stories_static.gif) ![Dynamic Stories](demo/stories_dynamic.gif)
 
 ## Features
-- Automatic switch between the stories with a configuration duration for each story.
+- Automatic switch between the stories with a configurable duration for each story.
 - Drag/Pull to close the stories view.
 - Callbacks to the client on Next/Previous stories.
 - Pause/Resume stories on tap.
