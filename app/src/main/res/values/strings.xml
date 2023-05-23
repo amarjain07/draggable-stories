@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">DraggableStoryView</string>
     <string name="title_1">Software Developer</string>
-    <string name="title_2">Amar Jain</string>
+    <string name="title_2">Weekend Coder</string>
     <string name="greet">You did it!</string>
     <string name="launch_static_stories">Static Stories</string>
     <string name="launch_dynamic_stories">Dynamic Stories</string>

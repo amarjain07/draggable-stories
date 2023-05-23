@@ -21,7 +21,7 @@ dependencies {
 ```
 
 ## Demo
-![Static Stories](demo/stories_static.gif) ![Dynamic Stories](demo/stories_dynamic.gif)
+![Static Stories](demo/stories_static.webm) ![Dynamic Stories](demo/stories_dynamic.webm)
 
 ## Features
 - Automatic switch between the stories with a configurable duration for each story.
