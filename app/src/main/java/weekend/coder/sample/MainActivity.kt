@@ -2,13 +2,19 @@ package weekend.coder.sample
 
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -24,6 +30,9 @@ class MainActivity : AppCompatActivity(), StoryCallback {
 
     private var currentClickState = ClickState.NONE
     private var dynamicStoriesView: StoriesView? = null
+    private var player: ExoPlayer? = null
+    private var loader: ProgressBar? = null
+    private val playbackStateListener: Player.Listener by lazy { playbackStateListener() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,14 +57,17 @@ class MainActivity : AppCompatActivity(), StoryCallback {
         val storyOne = LayoutInflater.from(this).inflate(
             R.layout.layout_story, null, false
         )
+        val storyThree = LayoutInflater.from(this).inflate(
+            R.layout.layout_video, null, false
+        )
+        loader = storyThree.findViewById(R.id.pb_loader)
         dynamicStoriesView?.addView(storyOne, INDEX_REMOTE_IMAGE_STORY)
         dynamicStoriesView?.addView(storyTwoTextView())
-        dynamicStoriesView?.let { storiesView ->
-            storiesView
-                .setStoryDurationsInSeconds(listOf(2, 1))
-                .setCallback(this@MainActivity)
-                .start()
-        }
+        dynamicStoriesView?.addView(storyThree, INDEX_REMOTE_VIDEO_STORY)
+        dynamicStoriesView
+            ?.setStoryDurationsInSeconds(listOf(2, 1))
+            ?.setCallback(this@MainActivity)
+            ?.start()
         dynamicStoriesContainer.removeAllViews()
         toggleDynamicStories(hide = false)
         dynamicStoriesContainer.addView(dynamicStoriesView)
@@ -86,14 +98,18 @@ class MainActivity : AppCompatActivity(), StoryCallback {
         btnDynamicLaunch.visibility = visibility
     }
 
-    private fun storyOneImage(imageView: ImageView, onImageLoad: () -> Unit) {
+    private fun loader(): CircularProgressDrawable {
         val circularProgressDrawable = CircularProgressDrawable(this)
         circularProgressDrawable.strokeWidth = 5f
         circularProgressDrawable.centerRadius = 60f
         circularProgressDrawable.start()
+        return circularProgressDrawable
+    }
+
+    private fun storyOneImage(imageView: ImageView, onImageLoad: () -> Unit) {
         Glide.with(this)
-            .load("https://i.ibb.co/9YPVgSm/PXL-20211206-123941364-PORTRAIT-2.jpg")
-            .placeholder(circularProgressDrawable)
+            .load(Constants.IMAGE_URL)
+            .placeholder(loader())
             .addListener(object : RequestListener<Drawable> {
                 override fun onResourceReady(
                     resource: Drawable?,
@@ -127,7 +143,7 @@ class MainActivity : AppCompatActivity(), StoryCallback {
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
-        storyTwo.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light))
+        storyTwo.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_green_light))
         storyTwo.gravity = Gravity.CENTER
         storyTwo.textSize = 24f
         storyTwo.typeface = Typeface.DEFAULT_BOLD
@@ -135,19 +151,46 @@ class MainActivity : AppCompatActivity(), StoryCallback {
         return storyTwo
     }
 
+    private fun storyThreeVideo(playerView: PlayerView) {
+        playerView.useController = false;
+        player = ExoPlayer.Builder(this)
+            .build()
+            .also { exoPlayer ->
+                playerView.player = exoPlayer
+                val mediaItem =
+                    MediaItem.fromUri(Uri.parse(Constants.VIDEO_URL))
+                exoPlayer.setMediaItem(mediaItem)
+                exoPlayer.playWhenReady = true
+                exoPlayer.seekTo(0, 0)
+                exoPlayer.addListener(playbackStateListener)
+                exoPlayer.prepare()
+            }
+    }
+
+    private fun releasePlayer() {
+        player?.removeListener(playbackStateListener)
+        player?.release()
+        player = null
+    }
+
     override fun onStoryEnd() {
         Log.d(TAG, "Story Ended")
-        if(currentClickState == ClickState.DYNAMIC){
+        if (currentClickState == ClickState.DYNAMIC) {
             toggleDynamicStories(hide = true)
         }
     }
 
     override fun onStoryChange(view: View, index: Int, direction: StoryChangeDirection) {
         Log.d(TAG, "Story Changed to $index")
-        if (currentClickState == ClickState.DYNAMIC && index == INDEX_REMOTE_IMAGE_STORY) {
-            dynamicStoriesView?.pause()
-            storyOneImage(view.findViewById(R.id.iv_image)) {
-                dynamicStoriesView?.resumeWithNewDuration(3)
+        if (currentClickState == ClickState.DYNAMIC) {
+            if (index == INDEX_REMOTE_IMAGE_STORY) {
+                dynamicStoriesView?.pause()
+                storyOneImage(view.findViewById(R.id.iv_image)) {
+                    dynamicStoriesView?.resumeWithNewDuration(3)
+                }
+            }
+            if (index == INDEX_REMOTE_VIDEO_STORY) {
+                storyThreeVideo(view.findViewById(R.id.pv_video))
             }
         }
     }
@@ -165,8 +208,32 @@ class MainActivity : AppCompatActivity(), StoryCallback {
         }
     }
 
+    private fun playbackStateListener() = object : Player.Listener {
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            when (playbackState) {
+                ExoPlayer.STATE_IDLE,
+                ExoPlayer.STATE_BUFFERING -> {
+                    Log.d(TAG, "Downloading Video")
+                    loader?.visibility = View.VISIBLE
+                    dynamicStoriesView?.pause()
+                }
+                ExoPlayer.STATE_READY -> {
+                    Log.d(TAG, "Video Ready")
+                    loader?.visibility = View.GONE
+                    val realDurationMillis: Long = player?.duration ?: 5L
+                    dynamicStoriesView?.resumeWithNewDuration(realDurationMillis.toInt() / 1000)
+                }
+                ExoPlayer.STATE_ENDED -> {
+                    Log.d(TAG, "Video Ended")
+                    releasePlayer()
+                }
+            }
+        }
+    }
+
     companion object {
         private const val TAG = "MainActivity"
         private const val INDEX_REMOTE_IMAGE_STORY = 0
+        private const val INDEX_REMOTE_VIDEO_STORY = 2
     }
 }
